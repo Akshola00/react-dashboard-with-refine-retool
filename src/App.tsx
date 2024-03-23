@@ -5,6 +5,8 @@ import { EditProduct } from "./Pages/EditProducts";
 import { CreateProduct } from "./Pages/CreateProducts";
 import { ListProducts } from "./Pages/ListProducts";
 import { authProvider } from "./Providers/auth-providers";
+import { Login } from "./Pages/Login";
+import { Header } from "./components/header/index";
 // import { ShowProducts } from "./Pages/ShowProduct";
 
 
@@ -15,7 +17,9 @@ function App() {
     {/* <ShowProduct/> */}
     {/* <EditProduct /> */}
     {/* <CreateProduct /> */}
-    <Authenticated key="protected" fallback={<div>please login</div>} >
+    <Authenticated key="protected" fallback={<Login />} >
+    <Header />
+
       <ListProducts/>
     </Authenticated>
     {/* <ListProducts /> */}

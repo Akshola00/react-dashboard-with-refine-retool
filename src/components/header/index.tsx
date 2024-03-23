@@ -1,5 +1,8 @@
 import type { RefineThemedLayoutV2HeaderProps } from "@refinedev/antd";
-import { useGetIdentity } from "@refinedev/core";
+
+
+import { useLogout, useGetIdentity } from "@refinedev/core";
+
 import {
   Layout as AntdLayout,
   Avatar,
@@ -23,6 +26,9 @@ type IUser = {
 export const Header: React.FC<RefineThemedLayoutV2HeaderProps> = ({
   sticky,
 }) => {
+  const { mutate, isLoading } = useLogout();
+  const { data: identity } = useGetIdentity();
+
   const { token } = useToken();
   const { data: user } = useGetIdentity<IUser>();
   const { mode, setMode } = useContext(ColorModeContext);
@@ -45,6 +51,14 @@ export const Header: React.FC<RefineThemedLayoutV2HeaderProps> = ({
   return (
     <AntdLayout.Header style={headerStyles}>
       <Space>
+           <h2>Welcome!</h2>
+      <button
+        type="button"
+        disabled={isLoading}
+        onClick={mutate}
+      >
+        Logout
+      </button>
         <Switch
           checkedChildren="🌛"
           unCheckedChildren="🔆"
@@ -52,8 +66,8 @@ export const Header: React.FC<RefineThemedLayoutV2HeaderProps> = ({
           defaultChecked={mode === "dark"}
         />
         <Space style={{ marginLeft: "8px" }} size="middle">
-          {user?.name && <Text strong>{user.name}</Text>}
-          {user?.avatar && <Avatar src={user?.avatar} alt={user?.name} />}
+         <span>welcome, </span>
+         <span>{identity?.name ?? ""}</span>
         </Space>
       </Space>
     </AntdLayout.Header>
