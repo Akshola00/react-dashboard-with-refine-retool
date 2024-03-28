@@ -1,108 +1,60 @@
-import { useTable, useMany } from "@refinedev/core";
+import { DeleteButton, EditButton, FilterDropdown, SaveButton, ShowButton } from "@refinedev/antd";
+import { BaseRecord } from "@refinedev/core";
+import { useTable } from "@refinedev/antd";
+import { Form, Input, Radio, Row, Space, Table } from "antd";
+import { table } from "console";
 
+interface Isearch {
+  name: string
+}
 export const ListProducts = () => {
-  const {
-    tableQueryResult: { data, isLoading },
-    current,
-    setCurrent,
-    pageCount,
-    sorters,
-    setSorters,
-  } = useTable({
-    resource: "protected-Products",
-    pagination: { current: 1, pageSize: 10 },
-    sorters: { initial: [{ field: "id", order: "asc" }] },
-  });
+  const { tableProps, searchFormProps } = useTable<Isearch>({
+    syncWithLocation: true,
+    resource: "products", sorters: {
+      initial: [{ field: "id", order: "asc" }]
+    }, onSearch: (values) => { return [{ field: "name", operator: "contains", values: values.name }] }
+  })
 
-  const { data: categories } = useMany({
-    resource: "categories",
-    ids: data?.data?.map((product) => product.category?.id) ?? [],
-  });
-
-  if (isLoading) {
-    return <div>Loading...</div>;
-  }
-
-  const onPrevious = () => {
-    if (current > 1) {
-      setCurrent(current - 1);
-    }
-  };
-
-  const onNext = () => {
-    if (current < pageCount) {
-      setCurrent(current + 1);
-    }
-  };
-
-  const onPage = (page: number) => {
-    setCurrent(page);
-  };
-
-  const getSorter = (field: string) => {
-    const sorter = sorters?.find((sorter) => sorter.field === field);
-
-    if (sorter) {
-      return sorter.order;
-    }
-  }
-
-  const onSort = (field: string) => {
-    const sorter = getSorter(field);
-    setSorters(
-        sorter === "desc" ? [] : [
-        {
-            field,
-            order: sorter === "asc" ? "desc" : "asc",
-        },
-        ]
-    );
-  }
-
-  const indicator = { asc: "⬆️", desc: "⬇️" };
 
   return (
     <div>
       <h1>Products</h1>
-      <table>
-        <thead>
-          <tr>
-            <th onClick={() => onSort("id")}>
-              ID {indicator[getSorter("id")]}
-            </th>
-            <th onClick={() => onSort("name")}>
-              Name {indicator[getSorter("name")]}
-            </th>
-            <th>
-              Category
-            </th>
-            <th onClick={() => onSort("material")}>
-              Material {indicator[getSorter("material")]}
-            </th>
-            <th onClick={() => onSort("price")}>
-              Price {indicator[getSorter("price")]}
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          {data?.data?.map((product) => (
-            <tr key={product.id}>
-              <td>{product.id}</td>
-              <td>{product.name}</td>
-              <td>
-                {
-                  categories?.data?.find(
-                    (category) => category.id == product.category?.id,
-                  )?.title
-                }
-              </td>
-              <td>{product.material}</td>
-              <td>{product.price}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-      <div className="pagination">
+      <Form {...searchFormProps} layout="inline" >
+        <Form.Item name="name">
+          <Input placeholder="search products" />
+        </Form.Item>
+        <SaveButton onClick={searchFormProps.form?.submit} />
+      </Form>
+      <Table {...tableProps} rowKey="id">
+        <Table.Column dataIndex='id' title={"ID"} />
+        <Table.Column dataIndex='name' title={"NAME"} />
+        <Table.Column dataIndex='material' title={"MATERIAL"} />
+        <Table.Column dataIndex='category' title={"CATEGORY"}
+          filterDropdown={(props) => (
+            <FilterDropdown {...props}>
+              <Radio.Group>
+                <Radio value="sports">Sports</Radio>
+                <Radio value="gaming">Gaming</Radio>
+                <Radio value="office">Office</Radio>
+              </Radio.Group>
+            </FilterDropdown>
+          )}
+        />
+        <Table.Column dataIndex='price' title={"PRICE"} />
+
+        <Table.Column title={"Actions"}
+          dataIndex="actions"
+          render={(_, record: BaseRecord) => (
+            <Space>
+              <EditButton size="small" recordItemId={record.id} />
+              <ShowButton size="small" recordItemId={record.id} />
+              <DeleteButton size="small" recordItemId={record.id} />
+            </Space>
+  )} />
+        <Row>1</Row>
+        <Row>Apple</Row>
+      </Table>
+      {/* <div className="pagination">
         <button type="button" onClick={onPrevious}>
           {"<"}
         </button>
@@ -114,7 +66,7 @@ export const ListProducts = () => {
         <button type="button" onClick={onNext}>
           {">"}
         </button>
-      </div>
+      </div> */}
     </div>
   );
 };
